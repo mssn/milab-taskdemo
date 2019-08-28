@@ -84,7 +84,7 @@ public class MainService extends Service {
         Log.i(getString(R.string.tag), "onDestroy()");
         getApplicationContext().unregisterReceiver(brPauseMI);
         getApplicationContext().unregisterReceiver(brResumeMI);
-
+        getApplicationContext().unregisterReceiver(brInsertCustomMsg);
         android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
     }
@@ -93,6 +93,7 @@ public class MainService extends Service {
     public void onTaskRemoved(Intent intent) {
         Log.i(getString(R.string.tag), "MainService.onTaskRemoved");
         super.onTaskRemoved(intent);
+        stopSelf();
     }
 
     private final ITask.Stub mBinder = new ITask.Stub() {
@@ -117,6 +118,10 @@ public class MainService extends Service {
         @Override
         public void exit() throws RemoteException {
             Log.i(getString(R.string.tag), "exit");
+            getApplicationContext().unregisterReceiver(brPauseMI);
+            getApplicationContext().unregisterReceiver(brResumeMI);
+            getApplicationContext().unregisterReceiver(brInsertCustomMsg);
+            /*Add your own codes to end this app properly*/
         }
 
         @Override
