@@ -53,6 +53,20 @@ public class MainService extends Service {
         }
     };
 
+    BroadcastReceiver brInsertCustomMsg = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(getString(R.string.tag), "Service received broadcast: " + intent.getAction());
+            try {
+                String strMsg = "Demo task message";
+                MainService.this.interfaceMILab.sendMsg("Task request to insert custom message: " + strMsg);
+                MainService.this.interfaceMILab.insertCustomMsg(strMsg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(getString(R.string.tag), "onStartCommand");
@@ -70,7 +84,7 @@ public class MainService extends Service {
         Log.i(getString(R.string.tag), "onDestroy()");
         getApplicationContext().unregisterReceiver(brPauseMI);
         getApplicationContext().unregisterReceiver(brResumeMI);
-
+        getApplicationContext().unregisterReceiver(brInsertCustomMsg);
         android.os.Process.killProcess(android.os.Process.myPid());
         super.onDestroy();
     }
@@ -79,6 +93,7 @@ public class MainService extends Service {
     public void onTaskRemoved(Intent intent) {
         Log.i(getString(R.string.tag), "MainService.onTaskRemoved");
         super.onTaskRemoved(intent);
+        stopSelf();
     }
 
     private final ITask.Stub mBinder = new ITask.Stub() {
@@ -103,6 +118,10 @@ public class MainService extends Service {
         @Override
         public void exit() throws RemoteException {
             Log.i(getString(R.string.tag), "exit");
+            getApplicationContext().unregisterReceiver(brPauseMI);
+            getApplicationContext().unregisterReceiver(brResumeMI);
+            getApplicationContext().unregisterReceiver(brInsertCustomMsg);
+            /*Add your own codes to end this app properly*/
         }
 
         @Override
@@ -117,6 +136,7 @@ public class MainService extends Service {
             MainService.this.interfaceMILab.sendMsg(getString(R.string.tag) + " started.");
             getApplicationContext().registerReceiver(brPauseMI, new IntentFilter(getString(R.string.tag) + ".MainService.PauseMI"));
             getApplicationContext().registerReceiver(brResumeMI, new IntentFilter(getString(R.string.tag) + ".MainService.ResumeMI"));
+            getApplicationContext().registerReceiver(brInsertCustomMsg, new IntentFilter(getString(R.string.tag) + ".MainService.InsertCustomMsg"));
             Intent dialogIntent = new Intent(getApplicationContext(), MainActivity.class);
             dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(dialogIntent);
