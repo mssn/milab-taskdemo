@@ -12,6 +12,7 @@ interface IMILab {
     void pauseMI();
     void resumeMI();
     void sendMsg(String strMsg);
+    void insertCustomMsg(String strMsg);
     void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat,
             double aDouble, String aString);
 }
